@@ -2,14 +2,14 @@ package org.fungover.resourceserver;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.oauth2.jwt.Jwt;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.repository.ListCrudRepository;
 import org.springframework.stereotype.Controller;
-import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import java.security.Principal;
+import java.util.Collection;
 import java.util.Map;
 
 @SpringBootApplication
@@ -18,33 +18,35 @@ public class ResourceServerApplication {
     public static void main(String[] args) {
         SpringApplication.run(ResourceServerApplication.class, args);
     }
+}
 
-    @Service
-    class GreetingsService {
+interface CustomerRepository extends ListCrudRepository<Customer, Integer> {
+}
 
-        @PreAuthorize("hasAuthority('SCOPE_user.read')")
-        public Map<String, String> greet() {
-            var jwt = (Jwt) SecurityContextHolder.getContext()
-                    .getAuthentication()
-                    .getPrincipal();
-            return Map.of("message", "hello, " + jwt.getSubject());
-        }
+record Customer(@Id Integer id, String name, String email) {
+}
+
+@Controller
+@ResponseBody
+class CustomerHttpController {
+
+    private final CustomerRepository repository;
+
+    CustomerHttpController(CustomerRepository repository) {
+        this.repository = repository;
     }
 
-    @Controller
-    @ResponseBody
-    class GreetingsController {
-
-        private final GreetingsService greetingsService;
-
-        GreetingsController(GreetingsService greetingsService) {
-            this.greetingsService = greetingsService;
-        }
-
-        @GetMapping("/")
-        Map<String, String> hello() {
-            return greetingsService.greet();
-        }
+    @GetMapping("/customers")
+    Collection<Customer> customers() {
+        return this.repository.findAll();
     }
+}
 
+@Controller
+@ResponseBody
+class MeHttpController {
+    @GetMapping("/me")
+    Map<String, String> principal(Principal principal) {
+        return Map.of("name", principal.getName());
+    }
 }
