@@ -38,6 +38,27 @@
 
 
 <script>
+    let config = {
+        headers: {
+            'X-CSRF-TOKEN': '',
+        }
+    }
+
+    const csrf = function (func = null) {
+        fetch("/csrf")
+            .then(tokenResp => tokenResp.json())
+            .then(tokenData => {
+                config = {
+                    headers: {
+                        'X-CSRF-TOKEN': tokenData.token,
+                    }
+                }
+                if (func)
+                    func();
+            })
+    };
+
+    csrf(null);
 
     const root = '/api'
 
@@ -52,7 +73,7 @@
     }
 
     async function email(customerId) {
-        const response = await fetch(root + '/email?customerId=' + customerId, {method: 'POST'})
+        const response = await fetch(root + '/email?customerId=' + customerId, {...config, method: "POST"})
         const data = await response.json()
         const cssQuerySelector = '#' + divIdFor({id: customerId}) + ' .id'
         document.querySelector(cssQuerySelector).classList.add('fade')
