@@ -14,7 +14,7 @@
 	<name>processor</name>
 	<description>processor</description>
 	<properties>
-		<java.version>21</java.version>
+		<java.version>22</java.version>
 	</properties>
 	<dependencies>
 		<dependency>
