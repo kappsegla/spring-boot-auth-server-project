@@ -7,6 +7,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.repository.ListCrudRepository;
+import org.springframework.http.HttpHeaders;
 import org.springframework.integration.amqp.dsl.Amqp;
 import org.springframework.integration.dsl.DirectChannelSpec;
 import org.springframework.integration.dsl.IntegrationFlow;
@@ -16,7 +17,6 @@ import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
-import org.springframework.security.web.csrf.CsrfToken;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
@@ -59,7 +59,8 @@ class CustomerHttpController {
 @ResponseBody
 class MeHttpController {
     @GetMapping("/me")
-    Map<String, String> principal(Principal principal) {
+    Map<String, String> principal(Principal principal, @RequestHeader HttpHeaders headers) {
+        headers.forEach((key, value) -> System.out.println(key + ":" + value));
         return Map.of("name", principal.getName());
     }
 }
