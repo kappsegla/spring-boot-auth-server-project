@@ -4,7 +4,6 @@ package org.fungover.oauthclient;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.cloud.gateway.filter.GatewayFilter;
-import org.springframework.cloud.gateway.filter.GlobalFilter;
 import org.springframework.cloud.gateway.filter.factory.AbstractGatewayFilterFactory;
 import org.springframework.cloud.gateway.route.RouteLocator;
 import org.springframework.cloud.gateway.route.builder.RouteLocatorBuilder;
@@ -13,7 +12,6 @@ import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.web.server.ServerHttpSecurity;
 import org.springframework.security.web.server.SecurityWebFilterChain;
-import java.security.Principal;
 import org.springframework.security.web.server.csrf.CsrfToken;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -21,7 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Mono;
 
-import java.util.function.Function;
+import java.security.Principal;
 
 @SpringBootApplication
 public class OauthclientApplication {
@@ -31,7 +29,7 @@ public class OauthclientApplication {
     }
 
     @Bean
-    RouteLocator gateway(RouteLocatorBuilder rlb,PreGatewayFilterFactory filter) {
+    RouteLocator gateway(RouteLocatorBuilder rlb, PreGatewayFilterFactory filter) {
         var apiPrefix = "/api/";
         return rlb
                 .routes()
@@ -65,7 +63,9 @@ public class OauthclientApplication {
     @Bean
     SecurityWebFilterChain springSecurityFilterChain(ServerHttpSecurity http) {
         http
-                .authorizeExchange((authorize) -> authorize.anyExchange().authenticated())
+                .authorizeExchange((authorize) -> authorize
+                        .pathMatchers("/.well-known/**").permitAll()
+                        .anyExchange().authenticated())
                 //.csrf(ServerHttpSecurity.CsrfSpec::disable)
                 .oauth2Login(Customizer.withDefaults())
                 .oauth2Client(Customizer.withDefaults());
@@ -105,7 +105,6 @@ class PreGatewayFilterFactory extends AbstractGatewayFilterFactory<PreGatewayFil
     }
 
 }
-
 
 
 @RestController

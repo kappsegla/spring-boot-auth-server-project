@@ -104,7 +104,7 @@ class ClientsConfiguration {
                                         AuthorizationGrantType.CLIENT_CREDENTIALS,
                                         AuthorizationGrantType.AUTHORIZATION_CODE,
                                         AuthorizationGrantType.REFRESH_TOKEN)))
-                                .redirectUri("http://127.0.0.1:8082/login/oauth2/code/spring")
+                                .redirectUri("http://localhost:8082/login/oauth2/code/spring")
                                 .scopes(scopes -> scopes.addAll(
                                         Set.of("user.read", "user.write", OidcScopes.OPENID)))
                                 .build()
